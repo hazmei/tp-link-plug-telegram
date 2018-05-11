@@ -12,8 +12,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger.setLevel(logging.INFO) #change to logging.DEBUG or logging.INFO or logging.CRITICAL
 
-t_TOKEN = "XXX"
-t_CHATID = XXX
+t_TOKEN = "xxx"
+t_CHATID = xxx
 
 plug_LIGHT = "xxx.xxx.xxx.xxx"
 plug_DESKTOP = "xxx.xxx.xxx.xxx"
@@ -67,25 +67,35 @@ def status_callback(bot, update):
     if check_auth(user_chat_id):
         bot.send_chat_action(chat_id=user_chat_id, action=telegram.ChatAction.TYPING)
 
-        comm_stat = 0
         light_state = "OFF"
         desk_state = "OFF"
 
+        light_exception = False
+        desk_exception = False
+        exception_msg = ''
+
         try:
             light_state = p_light.state
-            comm_stat += 1
-
-            desk_state = p_desktop.state
-
-            bot.send_message(chat_id=user_chat_id, text='Living Room Light: *{}*\nDesktop: *{}*'.format(light_state, desk_state), parse_mode=telegram.ParseMode.MARKDOWN)
-        except pyHS100.smartdevice.SmartDeviceException:
-            if comm_stat == 0:
-                bot.send_message(chat_id=user_chat_id, text='Unable to reach smart plug', parse_mode=telegram.ParseMode.MARKDOWN)
-            elif comm_stat == 1:
-                update.message.reply_text('Living Room Light: {}\nDesktop: Unable to reach'.format(light_state))
-                bot.send_message(chat_id=user_chat_id, text='Living Room Light: *{}*\nDesktop: Unable to reach'.format(light_state), parse_mode=telegram.ParseMode.MARKDOWN)
         except Exception as e:
-            bot.send_message(chat_id=user_chat_id, text='Exception occurred:\n*{}*'.format(e), parse_mode=telegram.ParseMode.MARKDOWN)
+            light_exception = True
+            exception_msg += "Living Room Light: *{}*".format(str(e))
+
+        try:
+            desk_state = p_desktop.state
+        except Exception as e:
+            desk_exception = True
+            if light_exception:
+                exception_msg += "\n"
+            exception_msg += "Desktop: *{}*".format(str(e))
+
+        if light_exception and desk_exception:
+            bot.send_message(chat_id=user_chat_id, text=exception_msg, parse_mode=telegram.ParseMode.MARKDOWN)
+        elif light_exception:
+            bot.send_message(chat_id=user_chat_id, text='Desktop: *{}*\n{}'.format(desk_state, exception_msg), parse_mode=telegram.ParseMode.MARKDOWN)
+        elif desk_exception:
+            bot.send_message(chat_id=user_chat_id, text='{}\nLiving Room Light: *{}*'.format(exception_msg, desk_state), parse_mode=telegram.ParseMode.MARKDOWN)
+        else:
+            bot.send_message(chat_id=user_chat_id, text='Desktop: *{}*\nLiving Room Light: *{}*'.format(desk_state,light_state), parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def toggle_callback(bot, update):
@@ -101,8 +111,6 @@ def toggle_callback(bot, update):
             bot.send_message(chat_id=user_chat_id, text='*/toggle* command missing device name', parse_mode=telegram.ParseMode.MARKDOWN)
             return
 
-        # if plug in light_name:
-        #     bot.send_message(chat_id=user_chat_id, text='Living Room Light plug toggle not allowed!', parse_mode=telegram.ParseMode.MARKDOWN)
         if plug in light_name:
         	bot.send_message(chat_id=user_chat_id, text='Living Room Light state: *{}*'.format(flip_state(p_light)), parse_mode=telegram.ParseMode.MARKDOWN)
         elif plug in desk_name:
