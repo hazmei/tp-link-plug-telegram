@@ -4,6 +4,11 @@
 This controls the tp-link smart plugs without going through the Kasa Application.  
 It runs on a Raspberry Pi 3 that is on the same network as the smart plugs.  
 
+### Files  
+- homeauto.py - required at gateway end (raspberry pi)
+- server.py  - required at server end where it handles telegram bot and sends commands to gateway
+- sockets.py - socket definition required on both server and gateway end
+
 ### Dependencies  
 - python3  
 - python3-pip  

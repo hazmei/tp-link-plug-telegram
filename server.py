@@ -6,63 +6,110 @@
 #       2. listen for telegram messages
 #   - add NLP (luis.ai maybe)
 
-import logging
-import telegram
+import sys
+import sockets
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from functools import wraps
 
-FILENAME = 'logs/output.log'
-logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',filename=FILENAME,level=logging.INFO)
+ENCRYPTION_KEY = 'xxx'
+TOKEN = "bot_token_here"
+LIST_OF_ADMINS = [chat_id_of_user_here]
 
-logger.setLevel(logging.INFO) #change to logging.DEBUG or logging.INFO or logging.CRITICAL
-
-t_TOKEN = "xxx"
-t_CHATID = "xxx"
-
-
-def check_auth(user_id):
-    if user_id == t_CHATID:
-        return True
-    else:
-        logger.warn("User {} unauthorized".format(user_id))
-        return False
-
-
-def start_callback(bot, update):
-    logger.info("User {} requested start command".format(update.message.chat_id))
-    user_chat_id = update.message.chat_id
-    if check_auth(user_chat_id):
-        bot.send_chat_action(chat_id=user_chat_id, action=telegram.ChatAction.TYPING)
-        bot.send_message(chat_id=user_chat_id, text='Hello {}. I am your Personal Assistant.'.format(update.message.from_user.first_name), parse_mode=telegram.ParseMode.MARKDOWN)
-
-
-def unknown(bot, update):
-    logger.info("Unknown command from: {}".format(update.message.chat_id))
-    user_chat_id = update.message.chat_id
-    if check_auth(update.message.from_user.id):
-        bot.send_chat_action(chat_id=user_chat_id, action=telegram.ChatAction.TYPING)
-        bot.send_message(chat_id=user_chat_id, text='Sorry your request is not recognized. Type */help* to show the list of commands that i understand.', parse_mode=telegram.ParseMode.MARKDOWN)
+def restricted(func):
+    @wraps(func)
+    def wrapped(bot, update, *args, **kwargs):
+        # extract user_id from arbitrary update
+        try:
+            user_id = update.message.from_user.id
+        except (NameError, AttributeError):
+            try:
+                user_id = update.inline_query.from_user.id
+            except (NameError, AttributeError):
+                try:
+                    user_id = update.chosen_inline_result.from_user.id
+                except (NameError, AttributeError):
+                    try:
+                        user_id = update.callback_query.from_user.id
+                    except (NameError, AttributeError):
+                        logger.error('No user_id available in update.')
+                        return
+        if user_id not in LIST_OF_ADMINS:
+            print('Unauthorized access denied for {}.'.format(user_id))
+            return
+        return func(bot, update, *args, **kwargs)
+    return wrapped
 
 
-def init_tUpdater():
-    updater = Updater(t_TOKEN)
+@restricted
+def start_handler(bot, update):
+    print("start_handler triggered")
 
+
+@restricted
+def help_handler(bot, update):
+    print("help_handler triggered")
+
+
+@restricted
+def conversation_handler(bot, update):
+    print("conversation_handler triggered")
+
+
+def socketHandler(sockObj):
+    print("Starting Server Socket")
+    sockObj.start_server()
+    print("Server started")
+
+    data = "something"
+    sockObj.send_data(data)
+    print("Data sent!: {}".format(data))
+
+    while True:
+      try:
+          response = sockObj.receive_data()
+          print("Response: {}".format(response))
+          if response == '' or response == None:
+              print("Connection died")
+              print("Insanity check: {}".format(sockObj.isAlive()))
+              sockObj.restart_client()
+              sockObj.send_data(sockObj.send_data())
+      except KeyboardInterrupt:
+          print("Terminating {}".format(__file__))
+          sockObj.terminate()
+          break
+
+
+def initialize_tbot(updater):
     dispatch = updater.dispatcher
-    unknown_handler = MessageHandler(Filters.command, unknown)
-    logger.debug("Adding dispatch to poll")
 
-    dispatch.add_handler(CommandHandler('start', start_callback))
-    dispatch.add_handler(unknown_handler)
-
-    updater.start_polling()
-    updater.idle()
-    updater.stop()
+    dispatch.add_handler(CommandHandler("start", start_handler))
+    dispatch.add_handler(CommandHandler("help", help_handler))
+    dispatch.add_handler(MessageHandler(Filters.text, conversation_handler))
 
 
 def run():
-    logger.info("Starting {}".format(__file__))
-    init_tUpdater()
+    print("Starting run")
+    socketsObj = sockets.communication('localhost',8082,ENCRYPTION_KEY)
+
+    updater = Updater(TOKEN)
+    # initialize_tbot(updater)
+
+    # starts the bot
+    # updater.start_polling()
+
+    # runs the bot until the process receives SIGINT, SIGTERM or SIGABRT
+    # start_polling() is non-blocking and will stop the bot gracefully
+    # updater.idle() # not necessary since our socket going to run forever
+
+    try:
+        socketHandler(socketsObj)
+    except Exception as e:
+        print("Exception on run() occurred: {}".format(e))
+    finally:
+        sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    print("Running {}".format(__file__))
     run()
+    print("Terminating {}".format(__file__))
