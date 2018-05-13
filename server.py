@@ -54,16 +54,19 @@ def restricted(func):
 def start_handler(bot, update):
     logger.debug("start_handler triggered: {}({})".format(update.message.from_user.first_name, update.message.chat_id))
 
+    msg = "Hey {}! You can request for status, turn on and off the available smart plugs below.\n- *Desktop*\n- *Living room light*\n\nJust converse to me normally and I will be able to understand your requests.".format(update.message.from_user.first_name)
+
     bot.send_chat_action(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-    bot.send_message(chat_id=update.message.chat_id, text='Hello {}. Below are the list of available smart plugs:\n1. *Light*\n2. *Desktop*'.format(update.message.from_user.first_name), parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.send_message(chat_id=update.message.chat_id, text=msg, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 @restricted
 def help_handler(bot, update):
     logger.debug("help_handler triggered: {}({})".format(update.message.from_user.first_name, update.message.chat_id))
 
+    msg = "Hey {}! You can request for status, turn on and off the available smart plugs below.\n- *Desktop*\n- *Living room light*\n\nJust converse to me normally and I will be able to understand your requests.".format(update.message.from_user.first_name)
     bot.send_chat_action(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-    bot.send_message(chat_id=update.message.chat_id, text='Here are the commands available:\n1. */start*\n2. */help*\n3. */status*\n4. */toggle* <device>', parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.send_message(chat_id=update.message.chat_id, text=msg, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 @restricted
@@ -73,12 +76,15 @@ def conversation_handler(bot, update):
     bot.send_chat_action(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
     msg = update.message.text
     logger.debug("Message from {}: \"{}\"".format(update.message.from_user.first_name, msg))
-    output = msg_handler(msg)
+    try:
+        output = msg_handler(msg)
+    except:
+        output = "Sorry, I am unable to access the home gateway at the moment. Please try again later."
 
     if output == None:
         output = "Sorry I do not understand your request."
     elif output == 'start':
-        output = "Hello {}. Below are the list of available smart plugs:\n1. *Light*\n2. *Desktop*".format(update.message.from_user.first_name)
+        output = "Hey {}! You can request for status, turn on and off the available smart plugs below.\n- *Desktop*\n- *Living room light*\n\nJust converse to me normally and I will be able to understand your requests.".format(update.message.from_user.first_name)
 
     try:
         bot.send_message(chat_id=update.message.chat_id, text=output, parse_mode=telegram.ParseMode.MARKDOWN)
@@ -106,9 +112,7 @@ def msg_handler(msg):
         return socket_handler("{} {}".format(commands['command'], commands['device']))
 
 
-def socket_handler(command):
-    print("Command to send: {}".format(command))
-    
+def socket_handler(command):    
     logger.debug("Starting client socket")
     SOCKET_OBJ.start_client()
     logger.debug("Client started")
@@ -124,7 +128,6 @@ def socket_handler(command):
     
     SOCKET_OBJ.terminate()
     return response
-
 
 
 def initialize_tbot(updater):

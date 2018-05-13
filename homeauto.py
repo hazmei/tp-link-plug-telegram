@@ -8,7 +8,7 @@ FILENAME = 'logs/output.log'
 ENCRYPTION_KEY = '<insert same key as server.py here for socket data encryption/decryption>'
 
 LIGHT_IP = "<ip address of smartplug 1>"
-DESKTOP_IP = "<ip address of smartplug 2>"
+DESKTOP_IP = "<ip address of smartplug 1>"
 
 LIGHT_OBJ = pyHS100.SmartPlug(LIGHT_IP)
 DESKTOP_OBJ = pyHS100.SmartPlug(DESKTOP_IP)
@@ -33,7 +33,6 @@ def socket_handler(sockObj):
                 logger.info("Client connection terminated")
                 sockObj.restart_server()
             else:
-                # do something here
                 response = command_handler(command)
                 sockObj.send_data(response)
 
@@ -57,6 +56,7 @@ def command_handler(command):
             else:
                 return 'Desktop state: *{}*'.format(DESKTOP_OBJ.state)
         else:
+            # get status for all
             try:
                 light_state = LIGHT_OBJ.state
             except Exception as e:
