@@ -11,9 +11,9 @@ import sockets
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from functools import wraps
 
-ENCRYPTION_KEY = 'xxx'
-TOKEN = "bot_token_here"
-LIST_OF_ADMINS = [chat_id_of_user_here]
+ENCRYPTION_KEY = 'thisisthekey'
+TOKEN = "573266803:AAEThZ0Mr1hGshRWgCXeTagHcTHkZmKhlrY"
+LIST_OF_ADMINS = [10680656]
 
 def restricted(func):
     @wraps(func)
@@ -56,27 +56,27 @@ def conversation_handler(bot, update):
 
 
 def socketHandler(sockObj):
-    print("Starting Server Socket")
-    sockObj.start_server()
-    print("Server started")
+    logger.debug("Starting Client Socket")
+    sockObj.start_client()
+    logger.debug("Client started")
 
     data = "something"
     sockObj.send_data(data)
     print("Data sent!: {}".format(data))
 
     while True:
-      try:
-          response = sockObj.receive_data()
-          print("Response: {}".format(response))
-          if response == '' or response == None:
-              print("Connection died")
-              print("Insanity check: {}".format(sockObj.isAlive()))
-              sockObj.restart_client()
-              sockObj.send_data(sockObj.send_data())
-      except KeyboardInterrupt:
-          print("Terminating {}".format(__file__))
-          sockObj.terminate()
-          break
+        try:
+            response = sockObj.receive_data()
+            print("Response: {}".format(response))
+            if response == '' or response == None:
+                print("Connection died")
+                print("Insanity check: {}".format(sockObj.isAlive()))
+                sockObj.restart_client()
+                sockObj.send_data(sockObj.send_data())
+        except KeyboardInterrupt:
+            logger.info("Terminating {}".format(__file__))
+            sockObj.terminate()
+            break
 
 
 def initialize_tbot(updater):
