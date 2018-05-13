@@ -1,8 +1,4 @@
-# NOTE: This is for smarthome gateway
-# Things to do:
-#	- socket for communication between (This will be the client establishing to server serve.hazmei.tk)
-#	- fork for sending commands to smartplugs
-#	- 1 method for just checking connection
+#!/usr/bin/python3
 import logging
 import sockets
 import sys
@@ -39,7 +35,7 @@ def socketHandler(sockObj):
 
 
 #figure out what's the authentication gonna be like
-def auth(sockObj):
+def sock_auth(sockObj):
 	return False
 
 def run():

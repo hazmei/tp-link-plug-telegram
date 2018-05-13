@@ -1,5 +1,4 @@
-# default sockets code for both server and client
-
+#!/usr/bin/python3
 from Crypto.Cipher import AES
 import base64
 import sys
@@ -104,7 +103,7 @@ class communication():
 
 def unit_test():
     print('Unit testing is running\n')
-    conn = communication('localhost',8082,'xxx')
+    conn = communication('localhost',8082,'thisisthekey')
     try:
         # UNCOMMENT BELOW FOR SERVER TEST #
         # =============================== #
