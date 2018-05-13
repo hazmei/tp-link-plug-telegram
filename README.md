@@ -8,6 +8,9 @@ It runs on a Raspberry Pi 3 that is on the same network as the smart plugs.
 - homeauto.py - required at gateway end (raspberry pi)
 - server.py  - required at server end where it handles telegram bot and sends commands to gateway
 - sockets.py - socket definition required on both server and gateway end
+- conversation.py - definition on querying and extracting specific information from LUIS.ai API
+- reverse.py - port forwarding for gateway end (raspberry pi)
+- luis_sdk - LUIS.ai SDK from [Microsoft Cognitive-LUIS-Python](https://github.com/Microsoft/Cognitive-LUIS-Python) repository required by server.py
 
 ### Dependencies  
 - python3  
