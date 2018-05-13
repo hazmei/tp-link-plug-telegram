@@ -36,8 +36,8 @@ class luis:
 
 
 def unit_test():
-    appid = '<insert luis.ai appid here>'
-    appkey = '<insert luis.ai appkey here>'
+    appid = '<luis.ai appid>'
+    appkey = '<luis.ai appkey>'
 
     try:
         conversationObj = luis(appid, appkey)

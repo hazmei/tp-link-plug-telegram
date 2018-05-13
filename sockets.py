@@ -1,4 +1,5 @@
-#!/usr/bin/python3
+# default sockets code for both server and client
+
 from Crypto.Cipher import AES
 import base64
 import sys
@@ -103,7 +104,7 @@ class communication():
 
 def unit_test():
     print('Unit testing is running\n')
-    conn = communication('localhost',8082,'thisisthekey')
+    conn = communication('<remote host to connect>', '<remote host port>', '<encryption/decryption key>')
     try:
         # UNCOMMENT BELOW FOR SERVER TEST #
         # =============================== #
