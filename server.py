@@ -11,9 +11,9 @@ import sockets
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from functools import wraps
 
-ENCRYPTION_KEY = 'thisisthekey'
-TOKEN = "573266803:AAEThZ0Mr1hGshRWgCXeTagHcTHkZmKhlrY"
-LIST_OF_ADMINS = [10680656]
+ENCRYPTION_KEY = 'xxx'
+TOKEN = "<telegram bot token here>"
+LIST_OF_ADMINS = [xxx]
 
 def restricted(func):
     @wraps(func)

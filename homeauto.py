@@ -8,7 +8,7 @@ import sockets
 import sys
 
 FILENAME = 'logs/output.log'
-ENCRYPTION_KEY = 'thisisthekey'
+ENCRYPTION_KEY = 'xxx'
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',filename=FILENAME,level=logging.INFO)
